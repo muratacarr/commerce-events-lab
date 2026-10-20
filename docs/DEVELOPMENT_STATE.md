@@ -10,7 +10,9 @@ internal network for database and broker, no role passwords in command-line argu
 
 Open:
 - Migration smoke tests, integration/contract/scenario checks, `tools/lab.py`.
-- CI has never run; branch protection and required human review are not configured.
+- CI ran on GitHub (owner-reported) and `main` is protected by a ruleset (push rejection and
+  pull request gating observed). Required approvals, bypass list and the human review gate:
+  NOT_VERIFIED. Interactive workspace trust: NOT_VERIFIED.
 - TDD Red run for the Compose tests was not captured.
 - Residual LOW items: secret file permissions (accepted for the single-user lab, see README),
   services keep outbound access through the `edge` network, loopback `trust` inside the
