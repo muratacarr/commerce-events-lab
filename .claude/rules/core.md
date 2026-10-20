@@ -1,0 +1,23 @@
+# core
+
+- ARCH-001 [MANDATORY] When always: Choose the simplest architecture that meets acceptance criteria, trust boundaries, scale and operations; justify consequential decisions and rejected alternatives in short ADRs.
+- ARCH-002 [MANDATORY] When always: Before changing interfaces, schemas, dependencies or shared behavior, identify consumers, migration and compatibility effects, and regression validation.
+- ARCH-003 [NOT_APPLICABLE] When no demonstrated requirement: Do not add Kafka, Kubernetes, Celery, CQRS, event sourcing or microservices by default; revisit only with evidence.
+- DOD-001 [MANDATORY] When before completion: Verify acceptance, applicable tests, builds, static checks, security review and scans, compatibility, documentation and residual risks with actual evidence; missing required evidence blocks completion.
+- DOR-001 [MANDATORY] When before implementation: Clarify scope, acceptance criteria, dependencies, change impact, security risks, test plan and expected outcome; resolve blocking ambiguity proportionately.
+- NOTES-001 [MANDATORY] When generated-project milestones: Before writing concise factual English interview notes, ignore /docs/interview/ and verify with Git; report already tracked notes and obtain approval before index changes. Never invent metrics or experience.
+- QUAL-001 [MANDATORY] When always: Keep cohesive responsibilities, clear naming and explicit boundaries; apply KISS, YAGNI, DRY and SOLID proportionately.
+- QUAL-002 [MANDATORY] When always: Use reproducible dependencies, safe configuration, appropriate static checks, meaningful error handling and documented local commands; never expose secrets.
+- QUAL-003 [CONDITIONAL] When production deployment is in scope: Define deployment, rollback, health checks, bounded resource use, observability and an operational runbook proportional to the system.
+- QUAL-004 [MANDATORY] When always: Record PASS, FAIL, NOT_VERIFIED or NOT_APPLICABLE with evidence; maintain concise development state at meaningful checkpoints.
+- REVIEW-001 [MANDATORY] When every actual generated-project change: Require a read-only Security Reviewer check tied to changed files and a change identifier, including shell-generated and low-risk edits; remediation changes require a fresh review.
+- REVIEW-002 [MANDATORY] When generated-project completion, merge or release: Reject pending, failed, stale or unavailable review evidence; verify actual hook events, reentrancy, external edits and independent CI enforcement before claiming guarantees.
+- REVIEW-003 [MANDATORY] When each security review: Record PASS, FAIL or NOT_VERIFIED, severity, location, threat, remediation and evidence; Critical/High block completion, Medium requires remediation or explicit permissible risk approval, and Low remains tracked.
+- RISK-001 [MANDATORY] When always: Classify exposure, data sensitivity, privilege, destructive actions, integrations and operational impact; state assumptions and raise uncertainty rather than assuming low risk.
+- RISK-002 [CONDITIONAL] When web application or HTTP API: Select applicable versioned ASVS requirements and assurance depth based on risk; do not copy the entire standard or claim compliance without evidence.
+- RISK-003 [CONDITIONAL] When personal, regulated or important durable data: Establish retention, deletion, audit, access, backup and tested restore obligations; resolve applicable legal requirements before consequential choices.
+- SEC-001 [MANDATORY] When always: Identify sensitive data, trust boundaries and threats before sensitive work; protect secrets and sensitive logs, validate untrusted inputs and use least privilege.
+- SEC-002 [MANDATORY] When always: Assess applicable authentication, authorization, injection, file, transport, storage, supply-chain and abuse risks; implement required controls and test negative paths. Inapplicable controls need explicit reasons.
+- SEC-003 [MANDATORY] When always: Never trade required security for convenience; unavailable required checks are NOT_VERIFIED and block successful completion. Track residual risks without claiming total security.
+- TEST-001 [MANDATORY] When generated applications where test-first is meaningful: Use Red/Green/Refactor by default, including regression tests before bug fixes; document justified alternative validation for non-testable changes. Engineering OS itself uses targeted evidence-based validation.
+- TEST-002 [MANDATORY] When always: Select unit, integration, contract, E2E, security and performance checks by risk; test denial and failure paths. Never weaken tests merely to pass or impose arbitrary total coverage.

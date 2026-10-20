@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "configured": true,
+  "checks": [
+    {
+      "name": "unit-and-contract-tests",
+      "category": "tests",
+      "command": ["python", "tools/venv_run.py", "-m", "pytest", "-q", "tests/unit", "tests/contract"]
+    },
+    {
+      "name": "compileall",
+      "category": "build",
+      "command": ["python", "tools/venv_run.py", "-m", "compileall", "-q", "src", "tools", "tests"]
+    },
+    {
+      "name": "ruff-lint",
+      "category": "static",
+      "command": ["python", "tools/venv_run.py", "-m", "ruff", "check", "src", "tests", "tools"]
+    },
+    {
+      "name": "ruff-format",
+      "category": "static",
+      "command": ["python", "tools/venv_run.py", "-m", "ruff", "format", "--check", "src", "tests", "tools"]
+    },
+    {
+      "name": "mypy-src",
+      "category": "static",
+      "command": ["python", "tools/venv_run.py", "-m", "mypy", "src"]
+    },
+    {
+      "name": "detect-secrets",
+      "category": "secrets",
+      "command": ["python", "tools/venv_run.py", "tools/scan_secrets.py"]
+    },
+    {
+      "name": "lock-is-current",
+      "category": "dependencies",
+      "command": ["uv", "lock", "--check"]
+    },
+    {
+      "name": "pip-audit",
+      "category": "dependencies",
+      "command": ["python", "tools/venv_run.py", "-m", "pip_audit", "-r", "requirements-dev.lock", "--no-deps", "--disable-pip", "--progress-spinner", "off"]
+    }
+  ],
+  "setup_requirement": "Setup-stage checks only. Integration, scenario, `docker compose config` and image-build checks are NOT_CONFIGURED until compose.yaml, Dockerfiles and real-broker tests exist (milestone L3+); adding them is a trusted manual edit of this file followed by a restart and re-audit. Do not add placeholder passes."
+}

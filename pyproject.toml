@@ -1,0 +1,69 @@
+[project]
+name = "commerce-events-lab"
+version = "0.0.0"
+description = "Event-driven commerce learning lab: Order, Payment and Inventory services (setup stage, no product code yet)."
+requires-python = ">=3.13,<3.14"
+readme = "README.md"
+dependencies = [
+    "fastapi==0.156.1",
+    "uvicorn==0.54.0",
+    "pydantic==2.14.1",
+    "pydantic-settings==2.16.1",
+    "sqlalchemy[asyncio]==2.1.5",
+    "psycopg[binary]==3.3.6",
+    "alembic==1.20.0",
+    "aio-pika==10.1.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "pytest-asyncio==1.4.0",
+    "httpx==0.28.1",
+    "ruff==0.17.1",
+    "mypy==2.4.0",
+    "pip-audit==2.10.1",
+    "detect-secrets==1.5.0",
+]
+
+[tool.uv]
+package = false
+required-environments = ["sys_platform == 'win32'", "sys_platform == 'linux'"]
+
+# Caches live under .venv, which the review snapshot excludes. A cache directory
+# in the tree would change the change_id after every quality run.
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+pythonpath = ["src"]
+cache_dir = ".venv/cache/pytest"
+addopts = "-ra --strict-markers --strict-config"
+asyncio_mode = "auto"
+markers = [
+    "tooling: tests of the setup/review/quality tooling itself",
+    "integration: needs a real PostgreSQL and/or RabbitMQ",
+    "contract: OpenAPI and wire-schema contract tests",
+    "scenario: API-to-broker-to-database failure-lab scenarios",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+cache-dir = ".venv/cache/ruff"
+src = ["src", "tests"]
+extend-exclude = ["project-recipe.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S603", "S607"]
+# Fixed argv, no shell, trusted project-local executables (see tools/*.py docstrings).
+"tools/**" = ["S603"]
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+mypy_path = "src"
+explicit_package_bases = true
+cache_dir = ".venv/cache/mypy"

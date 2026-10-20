@@ -1,0 +1,63 @@
+name: ci
+
+# Runs the real project checks for every change. It deliberately does NOT call
+# tools/quality_gate.py: that gate trusts local review evidence, which CI must not.
+# Merge approval comes from branch protection (required status checks + required
+# human review), configured in GitHub settings; see docs/CI.md.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.13"
+          enable-cache: false
+
+      - name: Install locked dependencies
+        run: uv sync --frozen
+
+      - name: Lock file is current
+        run: uv lock --check
+
+      - name: Unit and contract tests
+        run: uv run --frozen python -m pytest -q tests/unit tests/contract
+
+      - name: Build (compileall)
+        run: uv run --frozen python -m compileall -q src tools tests
+
+      - name: Ruff lint
+        run: uv run --frozen python -m ruff check src tests tools
+
+      - name: Ruff format
+        run: uv run --frozen python -m ruff format --check src tests tools
+
+      - name: Mypy
+        run: uv run --frozen python -m mypy src
+
+      - name: Secret scan
+        run: uv run --frozen python tools/scan_secrets.py
+
+      - name: Dependency audit
+        run: uv run --frozen python -m pip_audit -r requirements-dev.lock --no-deps --disable-pip --progress-spinner off
+
+      # Added with the milestones that create them (NOT_CONFIGURED until then):
+      #   docker compose config --quiet, image builds, migration smoke tests,
+      #   integration and scenario tests against real PostgreSQL and RabbitMQ.

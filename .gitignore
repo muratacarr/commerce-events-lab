@@ -1,0 +1,18 @@
+/docs/interview/
+/.engineering-os-review/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+
+# Local tooling (caches live under .venv so the change snapshot stays stable)
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Generated lab secrets (PROJECT-016); never commit
+/secrets/
+*.pem
+*.key

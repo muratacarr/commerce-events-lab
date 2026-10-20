@@ -1,0 +1,175 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Agent(security-reviewer)",
+      "Bash(python .claude/hooks/security_gate.py report)",
+      "Bash(python tools/quality_gate.py)"
+    ],
+    "ask": [
+      "Write",
+      "Edit",
+      "NotebookEdit"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Edit(./.engineering-os-review/**)",
+      "Edit(./.claude/hooks/**)",
+      "Edit(./.claude/settings.json)",
+      "Edit(./.claude/agents/security-reviewer.md)",
+      "Edit(./.engineering-os-quality.json)",
+      "Edit(./CLAUDE.md)",
+      "Edit(./tools/quality_gate.py)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-c",
+              "import runpy, sys\ntry:\n    path = sys.argv.pop(1)\n    sys.argv[0] = path\n    runpy.run_path(path, run_name=\"__main__\")\nexcept Exception:\n    print(\"BLOCKED: security hook runtime unavailable; do not claim completion\", file=sys.stderr)\n    sys.exit(2)\n",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/security_gate.py",
+              "hook"
+            ],
+            "timeout": 30,
+            "onFailure": "block"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-c",
+              "import runpy, sys\ntry:\n    path = sys.argv.pop(1)\n    sys.argv[0] = path\n    runpy.run_path(path, run_name=\"__main__\")\nexcept Exception:\n    print(\"BLOCKED: security hook runtime unavailable; do not claim completion\", file=sys.stderr)\n    sys.exit(2)\n",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/security_gate.py",
+              "hook"
+            ],
+            "timeout": 30,
+            "onFailure": "block"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-c",
+              "import runpy, sys\ntry:\n    path = sys.argv.pop(1)\n    sys.argv[0] = path\n    runpy.run_path(path, run_name=\"__main__\")\nexcept Exception:\n    print(\"BLOCKED: security hook runtime unavailable; do not claim completion\", file=sys.stderr)\n    sys.exit(2)\n",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/security_gate.py",
+              "hook"
+            ],
+            "timeout": 30,
+            "onFailure": "block"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-c",
+              "import runpy, sys\ntry:\n    path = sys.argv.pop(1)\n    sys.argv[0] = path\n    runpy.run_path(path, run_name=\"__main__\")\nexcept Exception:\n    print(\"BLOCKED: security hook runtime unavailable; do not claim completion\", file=sys.stderr)\n    sys.exit(2)\n",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/security_gate.py",
+              "hook"
+            ],
+            "timeout": 30,
+            "onFailure": "block"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-c",
+              "import runpy, sys\ntry:\n    path = sys.argv.pop(1)\n    sys.argv[0] = path\n    runpy.run_path(path, run_name=\"__main__\")\nexcept Exception:\n    print(\"BLOCKED: security hook runtime unavailable; do not claim completion\", file=sys.stderr)\n    sys.exit(2)\n",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/security_gate.py",
+              "hook"
+            ],
+            "timeout": 30,
+            "onFailure": "block"
+          }
+        ],
+        "matcher": "security-reviewer"
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-c",
+              "import runpy, sys\ntry:\n    path = sys.argv.pop(1)\n    sys.argv[0] = path\n    runpy.run_path(path, run_name=\"__main__\")\nexcept Exception:\n    print(\"BLOCKED: security hook runtime unavailable; do not claim completion\", file=sys.stderr)\n    sys.exit(2)\n",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/security_gate.py",
+              "hook"
+            ],
+            "timeout": 30
+          }
+        ],
+        "matcher": "security-reviewer"
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-c",
+              "import runpy, sys\ntry:\n    path = sys.argv.pop(1)\n    sys.argv[0] = path\n    runpy.run_path(path, run_name=\"__main__\")\nexcept Exception:\n    print(\"BLOCKED: security hook runtime unavailable; do not claim completion\", file=sys.stderr)\n    sys.exit(2)\n",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/security_gate.py",
+              "hook"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python",
+            "args": [
+              "-c",
+              "import runpy, sys\ntry:\n    path = sys.argv.pop(1)\n    sys.argv[0] = path\n    runpy.run_path(path, run_name=\"__main__\")\nexcept Exception:\n    print(\"BLOCKED: security hook runtime unavailable; do not claim completion\", file=sys.stderr)\n    sys.exit(2)\n",
+              "${CLAUDE_PROJECT_DIR}/.claude/hooks/security_gate.py",
+              "hook"
+            ],
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
