@@ -1,0 +1,155 @@
+# Local lab only: synthetic data, loopback-only service ports, no published database or broker
+# ports. Run `python tools/gen_secrets.py` once before `docker compose up`.
+# The three services sit behind the "services" profile because they contain no application yet.
+name: commerce-events-lab
+
+services:
+  postgres:
+    image: postgres:18.6@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_superuser_password
+    secrets:
+      - postgres_superuser_password
+      - order_db_owner_password
+      - order_db_app_password
+      - payment_db_owner_password
+      - payment_db_app_password
+      - inventory_db_owner_password
+      - inventory_db_app_password
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./infra/postgres/init-databases.sh:/docker-entrypoint-initdb.d/10-init-databases.sh:ro
+    networks: [lab]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
+
+  rabbitmq:
+    image: rabbitmq:4.3.6-management-alpine@sha256:3505b6096cdbc083bcc363e74366f575ecd0c1a55be4dadcbc60fa08e34647e1
+    secrets:
+      - rabbitmq_definitions
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+      - ./infra/rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/20-lab.conf:ro
+    networks: [lab]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
+
+  order:
+    profiles: [services]
+    build:
+      context: .
+      args:
+        SERVICE: order
+    image: commerce-lab-order:dev
+    ports:
+      - "127.0.0.1:8001:8000"
+    secrets:
+      - order_db_app_password
+      - order_amqp_password
+    networks: [lab, edge]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+  payment:
+    profiles: [services]
+    build:
+      context: .
+      args:
+        SERVICE: payment
+    image: commerce-lab-payment:dev
+    ports:
+      - "127.0.0.1:8002:8000"
+    secrets:
+      - payment_db_app_password
+      - payment_amqp_password
+    networks: [lab, edge]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+  inventory:
+    profiles: [services]
+    build:
+      context: .
+      args:
+        SERVICE: inventory
+    image: commerce-lab-inventory:dev
+    ports:
+      - "127.0.0.1:8003:8000"
+    secrets:
+      - inventory_db_app_password
+      - inventory_amqp_password
+    networks: [lab, edge]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+
+networks:
+  # Internal: no outbound access for the database, the broker or the services' lab traffic.
+  lab:
+    driver: bridge
+    internal: true
+  # Only the services join this network, because published ports need a non-internal one.
+  edge:
+    driver: bridge
+
+volumes:
+  pgdata:
+  rabbitmqdata:
+
+secrets:
+  postgres_superuser_password:
+    file: ./secrets/postgres_superuser_password.txt
+  order_db_owner_password:
+    file: ./secrets/order_db_owner_password.txt
+  order_db_app_password:
+    file: ./secrets/order_db_app_password.txt
+  payment_db_owner_password:
+    file: ./secrets/payment_db_owner_password.txt
+  payment_db_app_password:
+    file: ./secrets/payment_db_app_password.txt
+  inventory_db_owner_password:
+    file: ./secrets/inventory_db_owner_password.txt
+  inventory_db_app_password:
+    file: ./secrets/inventory_db_app_password.txt
+  order_amqp_password:
+    file: ./secrets/order_amqp_password.txt
+  payment_amqp_password:
+    file: ./secrets/payment_amqp_password.txt
+  inventory_amqp_password:
+    file: ./secrets/inventory_amqp_password.txt
+  rabbitmq_definitions:
+    file: ./secrets/rabbitmq_definitions.json

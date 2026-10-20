@@ -31,7 +31,7 @@ Interpreter: CPython 3.13 (`requires-python >=3.13,<3.14`). Host has 3.13.15; th
 base below is 3.13.16 (patch mismatch accepted). 3.14 and 3.15 were available but newer than
 the development host; revisit deliberately, not by drift.
 
-## Container images (digests are Docker Hub manifest-list digests; pulled and run: NOT_VERIFIED)
+## Container images (digests are Docker Hub manifest-list digests; pulled and run on 2026-10-20: PASS, see docs/SETUP_VERIFICATION.md)
 
 | Image | Tag | Digest |
 |---|---|---|
@@ -41,7 +41,7 @@ the development host; revisit deliberately, not by drift.
 
 RabbitMQ 4.4.0 was published the same day and is deliberately not selected. Compose references
 must use tag plus digest, never `latest`. PostgreSQL 18 changed the default data directory
-layout; verify the volume mount when `compose.yaml` is written.
+layout; `compose.yaml` mounts the volume at `/var/lib/postgresql` and the container started healthy.
 
 ## Host tooling observed
 
@@ -50,5 +50,6 @@ Docker 29.7.2 with Compose v5.5.1 (daemon reachable, Linux containers).
 
 ## Not yet done (by design at setup stage)
 
-`compose.yaml`, Dockerfiles, image builds, migration smoke tests, `docker compose config`,
-integration/scenario test checks, `tools/lab.py`, and CI. See `docs/SETUP_VERIFICATION.md`.
+Done in the Compose skeleton change: `compose.yaml`, `Dockerfile`, `docker compose config`, three
+image builds, PostgreSQL/RabbitMQ start. Still not done: migration smoke tests, integration/scenario
+test checks, `tools/lab.py` and a CI run. See `docs/SETUP_VERIFICATION.md`.

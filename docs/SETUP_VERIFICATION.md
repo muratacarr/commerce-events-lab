@@ -60,12 +60,64 @@ here because recording them would itself be a new change.
 | `detect-secrets` scan with positive and negative control | PASS | |
 | Package licenses | PARTIAL | pip-audit and detect-secrets license metadata absent: NOT_VERIFIED; psycopg is LGPL-3.0 |
 
-## Not done by design (blocks implementation approval only where stated)
+## Compose skeleton (change f035f362, recorded 2026-10-20)
+
+Scope: infrastructure and image build definitions only; no application code. Docker checks ran
+in a copy outside the repository with freshly generated secrets, under the separate Compose
+project `lab-verify`; the copy and that project's containers, volumes, network and images were
+removed afterwards. Nothing under `./secrets` was created in this repository.
+
+| Item | Status | Evidence |
+|---|---|---|
+| Security review of the 8 skeleton files | PASS | fifth attempt; no CRITICAL/HIGH/MEDIUM; 4 LOW (see Residual items) |
+| Review delivery under large scope | FAIL then mitigated | four reviewers (16-26 tool calls) ended without `SubagentHandback`, leaving `NOT_VERIFIED`; the fifth, given an explicit budget of 11 `Read` calls, delivered. Cause NOT_VERIFIED |
+| `python tools/quality_gate.py` | PASS | 8/8 checks, including `tests/unit/tooling/test_compose_controls.py` |
+| TDD Red run for the new tests | NOT_VERIFIED | first attempt used a pytest flag that conflicts with `cache_dir`; the Red state was never captured, only Green |
+| `docker compose config --quiet` | PASS | in the repository (no secrets present) and in the copy with `--profile services` |
+| Three service images build | PASS | `--require-hashes` install from `requirements.lock`; images run as UID 10001 |
+| Default service command | PASS | exits 1 with "no application code yet" by design |
+| Invalid `SERVICE` build arg rejected | PASS (weak) | the build fails at the `COPY` stage; the Dockerfile `case` check was not reached |
+| PostgreSQL 18.6 and RabbitMQ 4.3.6 pinned digests start healthy | PASS | `up --wait` healthy; volume mounted at `/var/lib/postgresql` |
+| One database per service with separate owner and app roles | PASS | 3 databases; `<svc>_owner` owns, `<svc>_app` cannot be superuser; `order_app` can connect to `order` only |
+| RabbitMQ has no `guest` user | PASS | `list_users` showed only `order`, `payment`, `inventory` |
+| RabbitMQ per-service permissions | PASS | each user limited to `^<svc>\.` on vhost `lab` |
+| Database and broker ports unpublished | PASS | `docker ps` shows exposed ports only, no host bindings |
+| Runtime privileges of `<svc>_app` on tables | NOT_VERIFIED | no tables exist; grants belong to the migrations |
+| Migration smoke tests | NOT_VERIFIED | no migrations yet |
+
+Follow-up change 0908d299 (fixes for three of the four LOW items; verified 2026-10-21 in a
+copy outside the repository under the separate Compose project `lab-verify2`, then removed):
+
+| Item | Status | Evidence |
+|---|---|---|
+| Security review | PASS | no CRITICAL/HIGH/MEDIUM; one new LOW (services keep outbound access) |
+| `python tools/quality_gate.py` | PASS | 8/8 checks |
+| TDD Red run | PASS | before the fix, `test_database_and_broker_have_no_outbound_network` and `test_init_script_never_puts_passwords_in_arguments` failed; after it, all 16 tests in the file pass |
+| Role passwords no longer in `psql` arguments | PASS | init script passes them through the environment of one `psql` process (`\getenv`); roles were created and authenticate |
+| Password authentication over the network | PASS | from the `order` container: real app password accepted; wrong password, another database and an owner/app password mix-up rejected |
+| `lab` network `internal: true` | PASS | from the postgres container an outbound connection fails with "Network is unreachable"; `order` still reaches `postgres` |
+| Service port publishing with the `edge` network | PASS | `docker ps` shows `127.0.0.1:8001->8000/tcp` for a kept-alive `order`; postgres and rabbitmq show exposed ports only |
+| Runtime services receive only their own secrets | PASS | `order` container lists `order_db_app_password` and `order_amqp_password` only |
+| Image tags and digests match this matrix | PASS | enforced by `test_image_tags_and_digests_match_setup_matrix` |
+| Connections from inside the PostgreSQL container | NOT_APPLICABLE as a control | the official image trusts loopback connections made inside the container, so a wrong password was accepted there; only network connections from other containers are password-protected |
+
+Residual items (all LOW, tracked):
+1. `tools/gen_secrets.py` keeps default host file permissions so container users can read the
+   bind-mounted secrets; a shared host could expose the synthetic credentials. Accepted for the
+   single-user lab and documented in the README.
+2. The three services join the non-internal `edge` network (needed for loopback port publishing),
+   so they keep outbound access. The database and broker do not.
+3. The official PostgreSQL image trusts loopback connections inside its own container; anyone who
+   can `docker exec` into it bypasses the passwords. Documented in the README.
+4. The environment of the init-script `psql` process is readable by the same user or root inside
+   the container, and statement logging would show the role statements if it were enabled.
+
+## Remaining scope and superseded items (blocks implementation approval only where stated)
 
 | Item | Status |
 |---|---|
-| `compose.yaml`, Dockerfiles, `docker compose config --quiet`, building three images | NOT_VERIFIED (milestone L3) |
-| Pull and run of the pinned PostgreSQL/RabbitMQ digests | NOT_VERIFIED |
+| `compose.yaml`, `Dockerfile`, `docker compose config --quiet`, building three images | PASS (see Compose skeleton section) |
+| Pull and run of the pinned PostgreSQL/RabbitMQ digests | PASS (see Compose skeleton section) |
 | Migration smoke tests per owned database | NOT_VERIFIED (L1/L3) |
 | Integration, contract (non-empty), scenario test checks in the gate | NOT_VERIFIED (added as tests appear; trusted config edit) |
 | `tools/lab.py` (doctor, scenario, replay --verify, trace) | NOT_VERIFIED (L7) |
