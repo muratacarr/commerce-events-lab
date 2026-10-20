@@ -121,5 +121,7 @@ Residual items (all LOW, tracked):
 | Migration smoke tests per owned database | NOT_VERIFIED (L1/L3) |
 | Integration, contract (non-empty), scenario test checks in the gate | NOT_VERIFIED (added as tests appear; trusted config edit) |
 | `tools/lab.py` (doctor, scenario, replay --verify, trace) | NOT_VERIFIED (L7) |
-| CI provider, protected branches, independent review gate | NOT_VERIFIED (provider undecided) |
+| CI provider (GitHub Actions) | PASS (owner-reported) | runs #1 and #2 completed successfully; logs not read here; see docs/CI.md |
+| Protected `main` | PARTIAL | ruleset `protect-main` active on the public repository; direct push rejected (GH013) and pull request merge gated by the `checks` status check; approvals, bypass list and force-push/deletion rules NOT_VERIFIED |
+| Independent human review gate | NOT_VERIFIED | required approvals and a second reviewer are unconfirmed |
 | Interactive workspace trust accepted | NOT_VERIFIED (user action) |
